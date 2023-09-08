@@ -11,15 +11,31 @@ import "./App.css";
 const socket = io.connect("http://localhost:5000");
 
 function App() {
-	
-const [ me, setMe ] = useState("")
-const [ receivingCall, setReceivingCall ] = useState(false)
-const [ idToCall, setIdToCall ] = useState("")
-const [ name, setName ] = useState("")
-const myVideo = useRef()
+  const [me, setMe] = useState("");
+  const [receivingCall, setReceivingCall] = useState(false);
+  const [idToCall, setIdToCall] = useState("");
+  const [name, setName] = useState("");
+  const myVideo = useRef();
 
   useEffect(() => {
     socket.emit("connection", "frontend connected");
+  }, []);
+
+  useEffect(() => {
+    navigator?.mediaDevices
+      ?.getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        myVideo.current.srcObject = stream;
+      });
+
+    socket.on("me", (id) => {
+      setMe(id);
+    });
+
+    socket.on("callUser", (data) => {
+      setReceivingCall(true);
+      setName(data.name);
+    });
   }, []);
 
   return (
@@ -28,15 +44,14 @@ const myVideo = useRef()
       <div className="container">
         <div className="video-container">
           <div className="video">
-              <video
-                playsInline
-                muted
-                ref={myVideo}
-                autoPlay
-                style={{ width: "300px" }}
-              />
+            <video
+              playsInline
+              muted
+              ref={myVideo}
+              autoPlay
+              style={{ width: "300px" }}
+            />
           </div>
-
         </div>
         <div className="myId">
           <TextField
@@ -65,17 +80,14 @@ const myVideo = useRef()
             onChange={(e) => setIdToCall(e.target.value)}
           />
           <div className="call-button">
-              <Button variant="contained" color="secondary">
-                End Call
-              </Button>
-            
-              <IconButton
-                color="primary"
-                aria-label="call"
-              >
-                <PhoneIcon fontSize="large" />
-              </IconButton>
-            
+            <Button variant="contained" color="secondary">
+              End Call
+            </Button>
+
+            <IconButton color="primary" aria-label="call">
+              <PhoneIcon fontSize="large" />
+            </IconButton>
+
             {idToCall}
           </div>
         </div>
