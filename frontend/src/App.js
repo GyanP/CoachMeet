@@ -3,6 +3,10 @@ import IconButton from "@material-ui/core/IconButton";
 import TextField from "@material-ui/core/TextField";
 import AssignmentIcon from "@material-ui/icons/Assignment";
 import PhoneIcon from "@material-ui/icons/Phone";
+import MicIcon from "@material-ui/icons/Mic";
+import MicOffIcon from "@material-ui/icons/MicOff";
+import VideocamIcon from "@material-ui/icons/Videocam";
+import VideocamOffIcon from "@material-ui/icons/VideocamOff";
 import React, { useEffect, useRef, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
 import Peer from "simple-peer";
@@ -20,13 +24,17 @@ function App() {
   const [idToCall, setIdToCall] = useState("");
   const [callEnded, setCallEnded] = useState(false);
   const [name, setName] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [newMessage, setNewMessage] = useState("");
+  const [isMicMuted, setIsMicMuted] = useState(false);
+  const [isCameraOn, setIsCameraOn] = useState(true);
   const myVideo = useRef();
   const userVideo = useRef();
   const connectionRef = useRef();
 
   useEffect(() => {
-    navigator?.mediaDevices
-      ?.getUserMedia({ video: true, audio: true })
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setStream(stream);
         myVideo.current.srcObject = stream;
@@ -42,7 +50,22 @@ function App() {
       setName(data.name);
       setCallerSignal(data.signal);
     });
-  }, []);
+
+    socket.on("chatMessage", (message) => {
+      setMessages([...messages, message]);
+    });
+  }, [me, messages]);
+
+  const sendMessage = () => {
+    if (newMessage.trim() !== "") {
+      socket.emit("chatMessage", {
+        text: newMessage,
+        sender: me,
+        senderName: name,
+      });
+      setNewMessage("");
+    }
+  };
 
   const callUser = (id) => {
     const peer = new Peer({
@@ -92,9 +115,21 @@ function App() {
     connectionRef.current.destroy();
   };
 
+  const toggleMic = () => {
+    const audioTracks = stream.getAudioTracks();
+    audioTracks.forEach((track) => (track.enabled = !isMicMuted));
+    setIsMicMuted(!isMicMuted);
+  };
+
+  const toggleCamera = () => {
+    const videoTracks = stream.getVideoTracks();
+    videoTracks.forEach((track) => (track.enabled = !isCameraOn));
+    setIsCameraOn(!isCameraOn);
+  };
+
   return (
     <>
-      <h1 style={{ textAlign: "center", color: "#fff" }}>Video Conferencing</h1>
+      <h1 style={{ textAlign: "center", color: "#fff" }}>Coach Conferencing</h1>
       <div className="container">
         <div className="video-container">
           <div className="video">
@@ -147,9 +182,29 @@ function App() {
           />
           <div className="call-button">
             {callAccepted && !callEnded ? (
-              <Button variant="contained" color="secondary" onClick={leaveCall}>
-                End Call
-              </Button>
+              <>
+                <Button
+                  variant="contained"
+                  color={isMicMuted ? "primary" : "secondary"}
+                  onClick={toggleMic}
+                >
+                  {isMicMuted ? <MicOffIcon /> : <MicIcon />}
+                </Button>
+                <Button
+                  variant="contained"
+                  color={isCameraOn ? "primary" : "secondary"}
+                  onClick={toggleCamera}
+                >
+                  {isCameraOn ? <VideocamIcon /> : <VideocamOffIcon />}
+                </Button>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={leaveCall}
+                >
+                  End Call
+                </Button>
+              </>
             ) : (
               <IconButton
                 color="primary"
@@ -173,6 +228,38 @@ function App() {
           ) : null}
         </div>
       </div>
+      {callAccepted && !callEnded && (
+        <div className="chat-container">
+          <div className="chat">
+            <div className="chat-messages">
+              {messages.map((message, index) => (
+                <div
+                  className={`message ${
+                    message.sender === me ? "my-message" : "other-message"
+                  }`}
+                  key={index}
+                >
+                  <p>
+                    {message.sender}: {message.text}
+                  </p>
+                </div>
+              ))}
+            </div>
+            <div className="chat-input">
+              <TextField
+                label="Type a message..."
+                variant="filled"
+                fullWidth
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+              />
+              <Button variant="contained" color="primary" onClick={sendMessage}>
+                Send
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

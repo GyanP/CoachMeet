@@ -48,3 +48,64 @@ body {
 		#4776e6
 	); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 }
+
+.chat-container {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	height: 100vh;
+  }
+  
+  .chat {
+	display: flex;
+	flex-direction: column;
+	width: 300px;
+	border: 1px solid #ccc;
+	border-radius: 4px;
+	overflow: hidden;
+  }
+  
+  .chat-messages {
+	flex-grow: 1;
+	padding: 10px;
+	overflow-y: auto;
+  }
+  
+  .message {
+	margin: 5px 0;
+	padding: 5px;
+	border-radius: 4px;
+  }
+  
+  .my-message {
+	background-color: #007bff;
+	color: #fff;
+	align-self: flex-end;
+  }
+  
+  .other-message {
+	background-color: #f0f0f0;
+	color: #333;
+	align-self: flex-start;
+  }
+  
+  .chat-input {
+	display: flex;
+	align-items: center;
+	padding: 10px;
+	border-top: 1px solid #ccc;
+  }
+  
+  .name-label {
+	background-color: rgba(0, 0, 0, 0.5);
+	color: #fff;
+	font-size: 14px;
+	padding: 4px 8px;
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	text-align: center;
+  }
+  
