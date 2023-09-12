@@ -58,7 +58,7 @@ function App() {
     socket.on("chatMessage", (message) => {
       setMessages([...messages, message]);
     });
-  }, [me, messages])
+  }, [me, messages]);
 
   const sendMessage = () => {
     if (newMessage.trim() !== "") {
@@ -72,11 +72,11 @@ function App() {
   };
 
   const onKeyDown = (e) => {
-    if(e.key === 'Enter'){
-      e.preventDefault(); 
-      sendMessage(); 
+    if (e.key === "Enter") {
+      e.preventDefault();
+      sendMessage();
     }
-  }
+  };
 
   const callUser = (id) => {
     if (name && idToCall) {
@@ -122,6 +122,7 @@ function App() {
     });
 
     peer.signal(callerSignal);
+
     connectionRef.current = peer;
   };
 
@@ -134,7 +135,7 @@ function App() {
     const audioTracks = stream.getAudioTracks();
     audioTracks.forEach((track) => (track.enabled = !isMicMuted));
     setIsMicMuted(!isMicMuted);
-  }; 
+  };
 
   const toggleCamera = () => {
     const videoTracks = stream.getVideoTracks();
@@ -152,7 +153,7 @@ function App() {
           marginBottom: "30px",
         }}
       >
-        Video Conferencing
+        Coach Conferencing
       </h1>
       <div className="container">
         <div className="d-flex">
@@ -162,7 +163,6 @@ function App() {
                 {stream && (
                   <video
                     playsInline
-                    // muted
                     muted={isMicMuted}
                     ref={myVideo}
                     autoPlay
@@ -170,7 +170,12 @@ function App() {
                   />
                 )}
                 <h3>{name}</h3>
-                {messages.length > 0 && messages[messages.length -1].senderName === name && messages[messages.length -1].text}
+                {messages.length > 0 &&
+                  messages[messages.length - 1].senderName === recieverName && (
+                    <div className="display-msg latest-message-container ">
+                      {messages[messages.length - 1].text}
+                    </div>
+                  )}
               </div>
               {callAccepted && !callEnded ? (
                 <div className="video">
@@ -181,7 +186,12 @@ function App() {
                     style={{ width: "100%" }}
                   />
                   <h3>{recieverName}</h3>
-                  {messages.length > 0 && messages[messages.length -1].senderName === recieverName && messages[messages.length -1].text}
+                  {messages.length > 0 &&
+                    messages[messages.length - 1].senderName === name && (
+                      <div className="display-msg latest-message-container ">
+                        {messages[messages.length - 1].text}
+                      </div>
+                    )}
                 </div>
               ) : null}
             </div>
@@ -221,8 +231,6 @@ function App() {
                   variant="filled"
                   value={idToCall}
                   onChange={(e) => setIdToCall(e.target.value)}
-                  // error={receivingCall && name}
-                  // helperText={"Please Enter ID"}
                 />
               </div>
 
@@ -245,7 +253,7 @@ function App() {
                         color={isMicMuted ? "primary" : "secondary"}
                         onClick={toggleMic}
                       >
-                        {isMicMuted ?  <MicIcon/>  : <MicOffIcon />}
+                        {isMicMuted ? <MicIcon /> : <MicOffIcon />}
                       </Button>
                       <Button
                         variant="contained"
@@ -271,7 +279,6 @@ function App() {
                       <PhoneIcon fontSize="large" />
                     </IconButton>
                   )}
-                  {/* {idToCall} */}
                 </div>
               </div>
             </div>
@@ -279,39 +286,58 @@ function App() {
 
           <div className="right-chat-container">
             {callAccepted && !callEnded && (
-              <div className="chat-container">
-                <div className="chat">
-                  <div className="chat-messages">
-                    {messages.map((message, index) => (
-                      <div
-                        className={`message ${
-                          message.sender === me ? "my-message" : "other-message"
-                        }`}
-                        key={index}
-                      >
-                        <p>
-                          {message.senderName}: {message.text}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="chat-input">
-                    <TextField
-                      label="Type a message..."
-                      variant="filled"
-                      fullWidth
-                      value={newMessage}
-                      onChange={(e) => setNewMessage(e.target.value)}
-                      onKeyDown={(e) => onKeyDown(e)}
+              <div class="page">
+                <div class="marvel-device nexus5">
+                  <div class="screen">
+                    <div class="screen-container">
+                      <div class="chat">
+                        <div class="chat-container">
+                          <div class="conversation">
+                            <div class="conversation-container">
+                              {messages.map((message, index) => (
+                                <>
+                                  {message.sender === me ? (
+                                    <div class="message sent">
+                                      <div className="chat-name">
+                                        {message.senderName}
+                                      </div>
+                                      {message.text}
+                                    </div>
+                                  ) : (
+                                    <div class="message received">
+                                      <div className="chat-name">
+                                        {message.senderName}
+                                      </div>
+                                      {message.text}
+                                    </div>
+                                  )}
+                                </>
+                              ))}
+                            </div>
+                            <form class="conversation-compose">
+                              <TextField
+                                placeholder="Type a message..."
+                                variant="filled"
+                                fullWidth
+                                value={newMessage}
+                                onChange={(e) => setNewMessage(e.target.value)}
+                                onKeyDown={(e) => onKeyDown(e)}
+                                class="input-msg"
+                              />
 
-                    />
-                    <Button
-                      variant="contained"
-                      color="primary"
-                      onClick={sendMessage}
-                    >
-                      Send
-                    </Button>
+                              <Button
+                                variant="contained"
+                                color="primary"
+                                onClick={sendMessage}
+                                class="send"
+                              >
+                                <div class="circle">Send</div>
+                              </Button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
