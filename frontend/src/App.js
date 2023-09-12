@@ -29,8 +29,8 @@ function App() {
   const [newMessage, setNewMessage] = useState("");
   const [isMicMuted, setIsMicMuted] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
+  const [multiStream, setMultiStream] = useState([]);
   const myVideo = useRef();
-  const userVideo = useRef();
   const connectionRef = useRef();
 
   useEffect(() => {
@@ -47,12 +47,12 @@ function App() {
 
     socket.on("callUser", (data) => {
       setReceivingCall(true);
+      setCallAccepted(false);
       setCaller(data.from);
       setRecieverName(data.name);
-      // setName(data.name);
       setCallerSignal(data.signal);
     });
-  }, []);
+  }, [socket]);
 
   useEffect(() => {
     socket.on("chatMessage", (message) => {
@@ -95,7 +95,12 @@ function App() {
         socket.emit("callUser", payload);
       });
       peer.on("stream", (stream) => {
-        userVideo.current.srcObject = stream;
+        if (multiStream.length < 10) {
+          setMultiStream([
+            ...multiStream,
+            { stream: stream, userToCall: id, from: me, name: recieverName },
+          ]);
+        }
       });
       socket.on("callAccepted", (data) => {
         setRecieverName(data.ans);
@@ -108,6 +113,7 @@ function App() {
   };
 
   const answerCall = () => {
+    setReceivingCall(false);
     setCallAccepted(true);
     const peer = new Peer({
       initiator: false,
@@ -118,7 +124,12 @@ function App() {
       socket.emit("answerCall", { signal: data, to: caller, ans: name });
     });
     peer.on("stream", (stream) => {
-      userVideo.current.srcObject = stream;
+      if (multiStream.length < 10) {
+        setMultiStream([
+          ...multiStream,
+          { stream: stream, to: caller, name: recieverName },
+        ]);
+      }
     });
 
     peer.signal(callerSignal);
@@ -126,7 +137,9 @@ function App() {
     connectionRef.current = peer;
   };
 
-  const leaveCall = () => {
+  const leaveCall = (e) => {
+    let ids = multiStream.map((obj) => obj.from);
+    multiStream.splice(ids.indexOf(me), 1);
     setCallEnded(true);
     connectionRef.current.destroy();
   };
@@ -177,22 +190,21 @@ function App() {
                     </div>
                   )}
               </div>
-              {callAccepted && !callEnded ? (
-                <div className="video">
-                  <video
-                    playsInline
-                    ref={userVideo}
-                    autoPlay
-                    style={{ width: "100%" }}
-                  />
-                  <h3>{recieverName}</h3>
-                  {messages.length > 0 &&
-                    messages[messages.length - 1].senderName === name && (
-                      <div className="display-msg latest-message-container ">
-                        {messages[messages.length - 1].text}
-                      </div>
-                    )}
-                </div>
+              {multiStream.length ? (
+                <>
+                  {multiStream.map((stream, index) => (
+                    <div className="video" key={index}>
+                      <UserVideos stream={stream.stream} />
+                      <h3>{stream.name}</h3>
+                      {messages.length > 0 &&
+                        messages[messages.length - 1].senderName === name && (
+                          <div className="display-msg latest-message-container ">
+                            {messages[messages.length - 1].text}
+                          </div>
+                        )}
+                    </div>
+                  ))}
+                </>
               ) : null}
             </div>
             <div className="receivingCall">
@@ -265,7 +277,7 @@ function App() {
                       <Button
                         variant="contained"
                         color="secondary"
-                        onClick={leaveCall}
+                        onClick={(e) => leaveCall(e)}
                       >
                         End Call
                       </Button>
@@ -286,25 +298,25 @@ function App() {
 
           <div className="right-chat-container">
             {callAccepted && !callEnded && (
-              <div class="page">
-                <div class="marvel-device nexus5">
-                  <div class="screen">
-                    <div class="screen-container">
-                      <div class="chat">
-                        <div class="chat-container">
-                          <div class="conversation">
-                            <div class="conversation-container">
+              <div className="page">
+                <div className="marvel-device nexus5">
+                  <div className="screen">
+                    <div className="screen-container">
+                      <div className="chat">
+                        <div className="chat-container">
+                          <div className="conversation">
+                            <div className="conversation-container">
                               {messages.map((message, index) => (
                                 <>
                                   {message.sender === me ? (
-                                    <div class="message sent">
+                                    <div className="message sent">
                                       <div className="chat-name">
                                         {message.senderName}
                                       </div>
                                       {message.text}
                                     </div>
                                   ) : (
-                                    <div class="message received">
+                                    <div className="message received">
                                       <div className="chat-name">
                                         {message.senderName}
                                       </div>
@@ -314,7 +326,7 @@ function App() {
                                 </>
                               ))}
                             </div>
-                            <form class="conversation-compose">
+                            <form className="conversation-compose">
                               <TextField
                                 placeholder="Type a message..."
                                 variant="filled"
@@ -322,16 +334,16 @@ function App() {
                                 value={newMessage}
                                 onChange={(e) => setNewMessage(e.target.value)}
                                 onKeyDown={(e) => onKeyDown(e)}
-                                class="input-msg"
+                                className="input-msg"
                               />
 
                               <Button
                                 variant="contained"
                                 color="primary"
                                 onClick={sendMessage}
-                                class="send"
+                                className="send"
                               >
-                                <div class="circle">Send</div>
+                                <div className="circle">Send</div>
                               </Button>
                             </form>
                           </div>
@@ -350,3 +362,13 @@ function App() {
 }
 
 export default App;
+
+const UserVideos = ({ stream }) => {
+  const userVideo = useRef();
+  useEffect(() => {
+    userVideo.current.srcObject = stream;
+  }, [stream]);
+  return (
+    <video playsInline ref={userVideo} autoPlay style={{ width: "100%" }} />
+  );
+};
