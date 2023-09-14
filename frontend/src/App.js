@@ -98,7 +98,7 @@ function App() {
         if (multiStream.length < 10) {
           setMultiStream([
             ...multiStream,
-            { stream: stream, userToCall: id, from: me, name: recieverName },
+            { stream: stream, userToCall: id, from: me, name: !recieverName ? "Coach" : recieverName },
           ]);
         }
       });
@@ -307,7 +307,7 @@ function App() {
                           <div className="conversation">
                             <div className="conversation-container">
                               {messages.map((message, index) => (
-                                <>
+                                <React.Fragment key={index}>
                                   {message.sender === me ? (
                                     <div className="message sent">
                                       <div className="chat-name">
@@ -323,7 +323,7 @@ function App() {
                                       {message.text}
                                     </div>
                                   )}
-                                </>
+                                </ React.Fragment>
                               ))}
                             </div>
                             <form className="conversation-compose">
