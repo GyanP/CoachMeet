@@ -13,7 +13,7 @@ import Peer from "simple-peer";
 import io from "socket.io-client";
 import "./App.css";
 
-const socket = io.connect("https://coach-meet.onrender.com");
+const socket = io.connect(["https://coach-meet.onrender.com", "http://localhost:5000"]);
 function App() {
   const [me, setMe] = useState("");
   const [stream, setStream] = useState();
