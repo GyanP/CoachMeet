@@ -12,6 +12,9 @@ const io = require("socket.io")(server, {
 
 const chatMessages = [];
 
+app.get("/",(req,res)=>{
+	res.send("Working...")
+})
 
 io.on("connection", (socket) => {
 	socket.emit("me", socket.id);
