@@ -5,7 +5,7 @@ const server = http.createServer(app)
 
 const io = require("socket.io")(server, {
 	cors: {
-		origin: ["https://coach-meet-next.vercel.app", "http://localhost:3000"],
+		origin: "https://coach-meet-next.vercel.app",
 		methods: [ "GET", "POST" ]
 	}
 })
