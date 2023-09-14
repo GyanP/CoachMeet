@@ -5,7 +5,7 @@ const server = http.createServer(app)
 
 const io = require("socket.io")(server, {
 	cors: {
-		origin: "http://localhost:3000",
+		origin: "https://coach-meet-next.vercel.app",
 		methods: [ "GET", "POST" ]
 	}
 })
@@ -13,7 +13,7 @@ const io = require("socket.io")(server, {
 const chatMessages = [];
 
 app.get("/",(req,res)=>{
-	res.send("Working...")
+	res.send("Working...");
 })
 
 io.on("connection", (socket) => {
