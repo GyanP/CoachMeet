@@ -182,8 +182,12 @@ function App() {
                     style={{ width: "100%" }}
                   />
                 )}
-                <div className="hover-video-name">{name}</div>
-                <h3>{name}</h3>
+                { !!name &&
+                  <>
+                    <div className="hover-video-name">{name}</div>
+                    <h3>{name}</h3>
+                  </>
+                }
                 {messages.length > 0 &&
                   messages[messages.length - 1].senderName === recieverName && (
                     <div className="display-msg latest-message-container ">
@@ -196,8 +200,12 @@ function App() {
                   {multiStream.map((stream, index) => (
                     <div className="video" key={index}>
                       <UserVideos stream={stream.stream} />
-                      <div className="hover-video-name">{name}</div>
-                      <h3>{stream.name}</h3>
+                      {!!stream.name &&
+                        <>
+                        <div className="hover-video-name">{stream.name}</div>
+                        <h3>{stream.name}</h3>
+                        </>
+                      }
                       {messages.length > 0 &&
                         messages[messages.length - 1].senderName === name && (
                           <div className="display-msg latest-message-container ">
