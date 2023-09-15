@@ -53,6 +53,28 @@
 	width: 31%;
 	position: relative;
 }
+.hover-video-name {
+    color: #fff;
+    font-size: 18px;
+    position: absolute;
+    top: 70px;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    align-items: center;
+    justify-content: center;
+    background: rgb(74 35 184);
+    transition: all 0.5s ease-out;
+    height: fit-content;
+    opacity: 0;
+    display: flex;
+    width: fit-content;
+    padding: 8px 12px;
+}
+.video-container .video:hover .hover-video-name{
+
+	opacity: 1;
+}
 .video-container .video h3{
 	text-align: center;
 }
@@ -141,7 +163,7 @@ body {
 
 .latest-message-container {
 	position: absolute;
-	background-color: rgba(0, 0, 0, 0.7);
+	background-color: rgb(74 35 184);
 	color: white;
 	padding: 10px;
 	border-radius: 20px;
