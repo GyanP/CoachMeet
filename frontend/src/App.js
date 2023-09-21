@@ -31,9 +31,9 @@ function App() {
   const [isMicMuted, setIsMicMuted] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [multiStream, setMultiStream] = useState([]);
-  const [isCoach, setIsCoach] = useState(false);
   const myVideo = useRef();
   const connectionRef = useRef();
+  const isCoach = multiStream.length && multiStream.some((obj) => obj.hasOwnProperty('to'));
 
   useEffect(() => {
     navigator.mediaDevices
@@ -64,7 +64,7 @@ function App() {
 
   useEffect(() => {
     socket.on("prompt", (promptText) => {
-      if (isCoach) {
+      if (!!isCoach) {
         toast.info(promptText, {
           position: 'top-center',
           autoClose: 2000,
@@ -75,10 +75,7 @@ function App() {
         })
       }
     });
-
-    setIsCoach(multiStream.length && multiStream.some((obj) => obj.hasOwnProperty('to')));
-
-  }, [isCoach, multiStream]);
+  }, [isCoach]);
 
   const sendMessage = () => {
     if (newMessage.trim() !== "") {

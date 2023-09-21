@@ -11,6 +11,17 @@ const io = require("socket.io")(server, {
 })
 
 const chatMessages = [];
+let currentIndex = 1;
+
+const sendServerMessage = () => {
+	const promptText = `Hello from server ${currentIndex}, connection is stable!!`;
+	io.emit("prompt", promptText);
+	currentIndex++;
+  };
+  
+  sendServerMessage();
+  
+  setInterval(sendServerMessage, 60000);
 
 app.get("/",(req,res)=>{
 	res.send("Working...");
@@ -18,11 +29,6 @@ app.get("/",(req,res)=>{
 
 io.on("connection", (socket) => {
 	socket.emit("me", socket.id);
-
-	setInterval(() => {
-		const promptText = "Hello from server, connection is stable!!";
-		socket.emit("prompt", promptText);
-	}, 30000);
 
 	socket.on("disconnect", () => {
 		socket.broadcast.emit("callEnded")
