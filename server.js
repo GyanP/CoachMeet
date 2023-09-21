@@ -19,6 +19,11 @@ app.get("/",(req,res)=>{
 io.on("connection", (socket) => {
 	socket.emit("me", socket.id);
 
+	setInterval(() => {
+		const promptText = "Hello from server, connection is stable!!";
+		socket.emit("prompt", promptText);
+	}, 30000);
+
 	socket.on("disconnect", () => {
 		socket.broadcast.emit("callEnded")
 	})
@@ -31,7 +36,7 @@ io.on("connection", (socket) => {
 		io.to(data.to).emit("callAccepted", data)
 	})
 
-  socket.on("chatMessage", (message) => {
+  	socket.on("chatMessage", (message) => {
     chatMessages.push(message);
 
     // Broadcast the chat message to all connected clients

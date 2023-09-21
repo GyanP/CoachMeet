@@ -9,6 +9,7 @@ import VideocamIcon from "@material-ui/icons/Videocam";
 import VideocamOffIcon from "@material-ui/icons/VideocamOff";
 import React, { useEffect, useRef, useState } from "react";
 import { CopyToClipboard } from "react-copy-to-clipboard";
+import { ToastContainer, toast } from 'react-toastify';
 import Peer from "simple-peer";
 import io from "socket.io-client";
 import "./App.css";
@@ -30,6 +31,7 @@ function App() {
   const [isMicMuted, setIsMicMuted] = useState(true);
   const [isCameraOn, setIsCameraOn] = useState(true);
   const [multiStream, setMultiStream] = useState([]);
+  const [isCoach, setIsCoach] = useState(false);
   const myVideo = useRef();
   const connectionRef = useRef();
 
@@ -59,6 +61,24 @@ function App() {
       setMessages([...messages, message]);
     });
   }, [me, messages]);
+
+  useEffect(() => {
+    socket.on("prompt", (promptText) => {
+      if (isCoach) {
+        toast.info(promptText, {
+          position: 'top-center',
+          autoClose: 2000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          pauseOnHover: true,
+          draggable: true,
+        })
+      }
+    });
+
+    setIsCoach(multiStream.length && multiStream.some((obj) => obj.hasOwnProperty('to')));
+
+  }, [isCoach, multiStream]);
 
   const sendMessage = () => {
     if (newMessage.trim() !== "") {
@@ -168,6 +188,7 @@ function App() {
       >
         Coach Conferencing
       </h1>
+      {!!isCoach && <ToastContainer />}
       <div className="container">
         <div className="d-flex">
           <div className="left-container">
